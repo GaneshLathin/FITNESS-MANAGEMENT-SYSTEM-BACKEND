@@ -1,31 +1,43 @@
-# Use official JDK 17 image
+# =============================
+# Stage 1: Build the application
+# =============================
 FROM eclipse-temurin:17-jdk-alpine AS builder
 
-# Set work directory
+# Set working directory
 WORKDIR /app
 
-# Copy Maven wrapper & pom.xml
+# Copy Maven wrapper & pom.xml first (for dependency caching)
 COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
 
-# Download dependencies
+# Make mvnw executable
+RUN chmod +x mvnw
+
+# Download dependencies (cached layer)
 RUN ./mvnw dependency:go-offline
 
-# Copy source code
+# Copy the actual project source
 COPY src src
 
-# Build the application
+# Build the Spring Boot application (skip tests for faster build)
 RUN ./mvnw clean package -DskipTests
 
-# ==========================
-# Final lightweight image
-# ==========================
+
+# =============================
+# Stage 2: Run the application
+# =============================
 FROM eclipse-temurin:17-jdk-alpine
+
+# Set working directory
 WORKDIR /app
 
-# Copy JAR from builder stage
+# Copy built JAR from builder stage
 COPY --from=builder /app/target/*.jar app.jar
+
+# Expose port (Spring Boot default is 8080)
+EXPOSE 8080
 
 # Run Spring Boot app
 ENTRYPOINT ["java", "-jar", "app.jar"]
+
