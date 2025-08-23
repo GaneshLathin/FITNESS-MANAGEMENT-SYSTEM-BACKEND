@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import Fitness_Management_System.Fitness.service.PasswordResetService;
 @RestController
 @RequestMapping("/api/auth") // Consistent with your existing auth endpoints
-@CrossOrigin(origins = "http://localhost:3000") // Ensure this matches your frontend URL
+@CrossOrigin(origins = "https://fitness-management-system-omega.vercel.app") // Ensure this matches your frontend URL
 public class PasswordResetController {
 
     @Autowired
