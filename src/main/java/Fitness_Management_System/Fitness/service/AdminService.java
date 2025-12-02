@@ -3,6 +3,10 @@ import Fitness_Management_System.Fitness.dto.UserSummaryDTO;
 import Fitness_Management_System.Fitness.model.User;
 import Fitness_Management_System.Fitness.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -88,16 +92,21 @@ public class AdminService {
         return userRepository.findByRole("TRAINER");
     }
 
-    public List<UserSummaryDTO> getAllUsersSummary() {
-        return userRepository.findAll().stream()
-                .map(user -> new UserSummaryDTO(
-                        user.getId(),
-                        user.getName(),
-                        user.getEmail(),
-                        user.getRole(),
-                        user.getAssignedTrainerId()
-                ))
-                .collect(Collectors.toList());
+    public Page<UserSummaryDTO> getAllUsersSummary(int page, int size, String sortBy, String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<User> usersPage = userRepository.findAll(pageable);
+
+        return usersPage.map(user -> new UserSummaryDTO(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getRole(),
+                user.getAssignedTrainerId()
+        ));
     }
     // Delete Admin by ID
     public String deleteAdmin(Long adminId) {

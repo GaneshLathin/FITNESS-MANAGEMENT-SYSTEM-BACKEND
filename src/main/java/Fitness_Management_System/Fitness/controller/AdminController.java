@@ -48,11 +48,17 @@ public class AdminController {
             return ResponseEntity.badRequest().body(result);
         }
     }
-    // FR9.1: View all users with roles
+    // FR9.1: View all users with pagination and sorting
     @GetMapping("/users")
-    public ResponseEntity<List<UserSummaryDTO>> getAllUsers() {
-        return ResponseEntity.ok(adminService.getAllUsersSummary());
+    public ResponseEntity<?> getAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir
+    ) {
+        return ResponseEntity.ok(adminService.getAllUsersSummary(page, size, sortBy, sortDir));
     }
+
 
 
     // Helper method for Admin to view all clients
